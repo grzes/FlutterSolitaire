@@ -17,7 +17,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: GameScreen(),
+      home: GameScreen()
     );
   }
 }
+      /*
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.wadda
+      ), / This trailing comma makes auto-formatting nicer for build methods.
+      */
