@@ -9,32 +9,32 @@ import 'blocs/game.dart';
 class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ColumnCubit([
-        PlayingCard(CardValue.ten, CardSuit.clubs),
-        PlayingCard(CardValue.jack, CardSuit.clubs, faceUp: true),
-        PlayingCard(CardValue.queen, CardSuit.clubs),
-      ]),
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        body: Center(
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ColumnWidget(),
-              SizedBox(width: 20),
-              ColumnWidget(),
-              //ColumnWidget()
-            ],
-          ),
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      body: Center(
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
+        child: BlocBuilder<GameCubit, GameState>(
+          builder: (context, gameState) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (var column in gameState.columnCubits)
+                  Padding(
+                    padding: const EdgeInsets.all(1), // don't need that because the columns are staggered anyway
+                    child: ColumnWidget(columnCubit: column),
+                  )
+              ],
+            );
+          }
         ),
-        /*floatingActionButton: FloatingActionButton(
-          onPressed: _incrementCounter,
-          tooltip: 'Restart',
-          child: const Icon(Icons.refresh),
-        ),*/
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.read<GameCubit>().initializeGame();
+        },
+        tooltip: 'Restart',
+        child: const Icon(Icons.refresh),
       ),
     );
   }
