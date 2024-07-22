@@ -42,30 +42,39 @@ class NestedStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    Widget subStack() => Stack(children: [
+      CardWidget(cards[0]),
+      Positioned(
+        top: 18,
+        left: 2,
+        child: NestedStack(columnCubit: columnCubit, index: index, cards: cards.sublist(1))
+      )
+    ]);
+
+
     return SizedBox(
       width: 90,
       height: 430,
       child:
-        (cards.isEmpty)? SizedBox.shrink() :
-        Draggable<CardDragData>(
-        data: CardDragData(from: index, cards: cards),
-        feedback: NestedStack(columnCubit: columnCubit, index: index, cards: cards),
-        childWhenDragging: const SizedBox.shrink(),
-        onDragCompleted: () {
-          columnCubit.removeCards(cards.length);
-        },
-        child: GestureDetector(
-          onTap: () => {},//context.read<ColumnCubit>().flipCard(i),
-          child: Stack(children: [
-            CardWidget(cards[0]),
-            Positioned(
-              top: 18,
-              left: 2,
-              child: NestedStack(columnCubit: columnCubit, index: index, cards: cards.sublist(1))
-            )
-          ])
-        ),
-      ),
+        (cards.isEmpty) ?
+          SizedBox.shrink() :
+            (cards[0].faceUp) ?
+              Draggable<CardDragData>(
+                data: CardDragData(from: index, cards: cards),
+                feedback: NestedStack(columnCubit: columnCubit, index: index, cards: cards),
+                childWhenDragging: const SizedBox.shrink(),
+                onDragCompleted: () {
+                  columnCubit.removeCards(cards.length);
+                },
+                child: subStack(),
+              ) :
+              GestureDetector(
+                onTap: () {
+                  columnCubit.flipTopCard();
+                },//context.read<ColumnCubit>().flipCard(i),
+                child: subStack(),
+              ),
     );
   }
 }

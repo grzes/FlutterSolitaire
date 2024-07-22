@@ -20,12 +20,21 @@ class ColumnCubit extends Cubit<ColumnState> {
     emit(ColumnState(cards));
   }
 
+  void flipTopCard() {
+    if (state.cards.lastOrNull?.faceUp == false) {
+      flipCard(state.cards.length-1);
+    }
+  }
+
   void removeCards(int num) {
     emit(ColumnState(state.cards.sublist(0, state.cards.length - num)));
   }
 
   bool willAcceptCards(List<PlayingCard> cards) {
-    return true;
+    var last = state.cards.last;
+    var first = cards[0];
+    return last.faceUp && last.cardColor != first.cardColor
+      && last.value.index == first.value.index + 1;
   }
 
   void addCards(List<PlayingCard> cards) {
@@ -57,12 +66,6 @@ class GameCubit extends Cubit<GameState> {
     // Update the state
     emit(GameState(columnCubits));
   }
-
-  void flipCard(int columnIndex, int cardIndex) {
-    state.columnCubits[columnIndex].flipCard(cardIndex);
-    // Emit a new state to trigger rebuilds
-    emit(GameState(List<ColumnCubit>.from(state.columnCubits)));
-  }
 }
 
 // Helpers:
@@ -72,7 +75,7 @@ List<PlayingCard> createDeck() {
   List<PlayingCard> deck = [];
   for (var suit in CardSuit.values) {
     for (var value in CardValue.values) {
-      deck.add(PlayingCard(value, suit, faceUp: true));
+      deck.add(PlayingCard(value, suit));
     }
   }
   return deck;
@@ -80,8 +83,18 @@ List<PlayingCard> createDeck() {
 
 List<List<PlayingCard>> distributeCards(List<PlayingCard> deck, int numberOfColumns) {
   List<List<PlayingCard>> columns = List.generate(numberOfColumns, (_) => []);
-  for (int i = 0; i < deck.length; i++) {
-    columns[i % numberOfColumns].add(deck[i]);
+
+  PlayingCard faceUp(PlayingCard card) => PlayingCard(card.value, card.suit, faceUp: true);
+  PlayingCard faceDown(PlayingCard card) => card;
+
+  int deckindex = 0;
+  for (int c=0; c<numberOfColumns; c++) {
+    for (int down=0; down < c; down++) {
+      columns[c].add(faceDown(deck[deckindex]));
+      deckindex++;
+    }
+    columns[c].add(faceUp(deck[deckindex]));
+    deckindex++;
   }
   return columns;
 }
