@@ -25,7 +25,7 @@ class ColumnWidget extends StatelessWidget {
             },
             builder: (context, candidateData, rejectedData) {
               var column = context.read<ColumnCubit>();
-              return NestedStack(columnCubit: column, index: index, cards: column.state.cards);
+              return NestedColumnStack(columnCubit: column, index: index, cards: column.state.cards);
             },
           );
         },
@@ -34,11 +34,11 @@ class ColumnWidget extends StatelessWidget {
   }
 }
 
-class NestedStack extends StatelessWidget {
+class NestedColumnStack extends StatelessWidget {
   final ColumnCubit columnCubit;
   final int index;
   final List<PlayingCard> cards;
-  const NestedStack({required this.columnCubit, required this.index, required this.cards, super.key});
+  const NestedColumnStack({required this.columnCubit, required this.index, required this.cards, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class NestedStack extends StatelessWidget {
       Positioned(
         top: 18,
         left: 2,
-        child: NestedStack(columnCubit: columnCubit, index: index, cards: cards.sublist(1))
+        child: NestedColumnStack(columnCubit: columnCubit, index: index, cards: cards.sublist(1))
       )
     ]);
 
@@ -62,7 +62,7 @@ class NestedStack extends StatelessWidget {
             (cards[0].faceUp) ?
               Draggable<CardDragData>(
                 data: CardDragData(from: index, cards: cards),
-                feedback: NestedStack(columnCubit: columnCubit, index: index, cards: cards),
+                feedback: NestedColumnStack(columnCubit: columnCubit, index: index, cards: cards),
                 childWhenDragging: const SizedBox.shrink(),
                 onDragCompleted: () {
                   columnCubit.removeCards(cards.length);
