@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'widgets/card_widget.dart';
 import 'widgets/card_column_widget.dart';
-import 'models/card.dart';
 import 'blocs/game.dart';
 
 class GameScreen extends StatelessWidget {
