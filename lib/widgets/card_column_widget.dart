@@ -6,7 +6,8 @@ import 'card_widget.dart';
 
 class ColumnWidget extends StatelessWidget {
   final ColumnCubit columnCubit;
-  const ColumnWidget({required this.columnCubit, super.key});
+  final int index;
+  const ColumnWidget({required this.columnCubit, required this.index, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,9 @@ class ColumnWidget extends StatelessWidget {
               //context.read<ColumnCubit>().onCardDropped(draggedCard);
             },
             builder: (context, candidateData, rejectedData) {
-              return SizedBox(
+              var cards = context.read<ColumnCubit>().state.cards;
+              return CardStack(cards: cards);
+              /*return SizedBox(
                 width: 80,
                 height: 250,
                 child: Stack(
@@ -33,7 +36,7 @@ class ColumnWidget extends StatelessWidget {
                         child: Draggable<PlayingCard>(
                           data: state.cards[i],
                           feedback: CardWidget(state.cards[i]),
-                          childWhenDragging: SizedBox.shrink(),
+                          childWhenDragging: const SizedBox.shrink(),
                           child: GestureDetector(
                             onTap: () => context.read<ColumnCubit>().flipCard(i),
                             child: CardWidget(state.cards[i]),
@@ -43,9 +46,41 @@ class ColumnWidget extends StatelessWidget {
                   ],
                 ),
               );
+              */
             },
           );
         },
+      ),
+    );
+  }
+}
+
+class CardStack extends StatelessWidget {
+  final List<PlayingCard> cards;
+  const CardStack({required this.cards, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 80,
+      height: 250,
+      child: Stack(
+        children: [
+          for (var i = 0; i < cards.length; i++)
+            Positioned(
+              top: i * 18,
+              left: i * 3,
+              child: Draggable<PlayingCard>(
+                data: cards[i],
+                feedback: CardStack(cards: cards.sublist(i)),
+                childWhenDragging: SizedBox.shrink(),
+                child: GestureDetector(
+                  onTap: () => context.read<ColumnCubit>().flipCard(i),
+                  child: CardWidget(cards[i]),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

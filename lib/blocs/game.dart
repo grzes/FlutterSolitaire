@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/card.dart';
 
@@ -71,4 +72,10 @@ List<List<PlayingCard>> distributeCards(List<PlayingCard> deck, int numberOfColu
     columns[i % numberOfColumns].add(deck[i]);
   }
   return columns;
+}
+
+class DragData {
+  final int from;
+  final List<PlayingCard> cards;
+  const DragData({required this.from, required this.cards});
 }

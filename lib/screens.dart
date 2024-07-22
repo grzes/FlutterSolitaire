@@ -19,10 +19,10 @@ class GameScreen extends StatelessWidget {
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                for (var column in gameState.columnCubits)
+                for (var item in gameState.columnCubits.asMap().entries)
                   Padding(
                     padding: const EdgeInsets.all(1), // don't need that because the columns are staggered anyway
-                    child: ColumnWidget(columnCubit: column),
+                    child: ColumnWidget(columnCubit: item.value, index: item.key),
                   )
               ],
             );
