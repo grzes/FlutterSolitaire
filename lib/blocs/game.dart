@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/card.dart';
 
@@ -31,6 +30,9 @@ class ColumnCubit extends Cubit<ColumnState> {
   }
 
   bool willAcceptCards(List<PlayingCard> cards) {
+    if (state.cards.isEmpty) {
+      return cards[0].value == CardValue.king;
+    }
     var last = state.cards.last;
     var first = cards[0];
     return last.faceUp && last.cardColor != first.cardColor
@@ -42,13 +44,27 @@ class ColumnCubit extends Cubit<ColumnState> {
   }
 }
 
+
+class DeckState {
+  final List<PlayingCard> deck;
+  final List<PlayingCard> waste;
+  DeckState(this.deck, this.waste);
+}
+
+class DeckCubit extends Cubit<DeckState> {
+  DeckCubit(List<PlayingCard> deck)
+      : super(DeckState(deck, List<PlayingCard>.empty()));
+
+}
+
 class GameState {
   final List<ColumnCubit> columnCubits;
-  GameState(this.columnCubits);
+  final DeckCubit deck;
+  GameState(this.columnCubits, this.deck);
 }
 
 class GameCubit extends Cubit<GameState> {
-  GameCubit() : super(GameState([])) {
+  GameCubit() : super(GameState([], DeckCubit([]))) {
     initializeGame();
   }
 
@@ -63,8 +79,9 @@ class GameCubit extends Cubit<GameState> {
     // Create ColumnCubits for each column
     final columnCubits = columns.map((cards) => ColumnCubit(cards)).toList();
 
+
     // Update the state
-    emit(GameState(columnCubits));
+    emit(GameState(columnCubits, DeckCubit(deck.sublist(28))));
   }
 }
 

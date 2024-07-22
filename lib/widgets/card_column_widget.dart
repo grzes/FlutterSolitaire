@@ -58,7 +58,7 @@ class NestedStack extends StatelessWidget {
       height: 430,
       child:
         (cards.isEmpty) ?
-          SizedBox.shrink() :
+          Container():
             (cards[0].faceUp) ?
               Draggable<CardDragData>(
                 data: CardDragData(from: index, cards: cards),
