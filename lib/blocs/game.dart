@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/card.dart';
 
@@ -17,6 +18,18 @@ class ColumnCubit extends Cubit<ColumnState> {
     final card = cards[index];
     cards[index] = PlayingCard(card.value, card.suit, faceUp: !card.faceUp);
     emit(ColumnState(cards));
+  }
+
+  void removeCards(int num) {
+    emit(ColumnState(state.cards.sublist(0, state.cards.length - num)));
+  }
+
+  bool willAcceptCards(List<PlayingCard> cards) {
+    return true;
+  }
+
+  void addCards(List<PlayingCard> cards) {
+    emit(ColumnState(state.cards + cards));
   }
 }
 
@@ -73,8 +86,8 @@ List<List<PlayingCard>> distributeCards(List<PlayingCard> deck, int numberOfColu
   return columns;
 }
 
-class DragData {
+class CardDragData {
   final int from;
   final List<PlayingCard> cards;
-  const DragData({required this.from, required this.cards});
+  const CardDragData({required this.from, required this.cards});
 }

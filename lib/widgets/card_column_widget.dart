@@ -1,3 +1,4 @@
+import 'package:blocsolitaire/widgets/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/game.dart';
@@ -15,11 +16,12 @@ class ColumnWidget extends StatelessWidget {
       value: columnCubit,
       child: BlocBuilder<ColumnCubit, ColumnState>(
         builder: (context, state) {
-          return DragTarget<PlayingCard>(
+          return DragTarget<CardDragData>(
             onAcceptWithDetails: (details) {
-              // Handle card drop logic
-              print("drop: ${details}");
-              //context.read<ColumnCubit>().onCardDropped(draggedCard);
+              context.read<ColumnCubit>().addCards(details.data.cards);
+            },
+            onWillAcceptWithDetails: (details) {
+              return context.read<ColumnCubit>().willAcceptCards(details.data.cards);
             },
             builder: (context, candidateData, rejectedData) {
               var column = context.read<ColumnCubit>();
@@ -40,21 +42,25 @@ class NestedStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (cards.isEmpty) return const SizedBox.shrink();
     return SizedBox(
       width: 90,
       height: 430,
-      child: Draggable<PlayingCard>(
-        data: cards[0],
+      child:
+        (cards.isEmpty)? SizedBox.shrink() :
+        Draggable<CardDragData>(
+        data: CardDragData(from: index, cards: cards),
         feedback: NestedStack(columnCubit: columnCubit, index: index, cards: cards),
         childWhenDragging: const SizedBox.shrink(),
+        onDragCompleted: () {
+          columnCubit.removeCards(cards.length);
+        },
         child: GestureDetector(
           onTap: () => {},//context.read<ColumnCubit>().flipCard(i),
           child: Stack(children: [
             CardWidget(cards[0]),
             Positioned(
               top: 18,
-              left: 3,
+              left: 2,
               child: NestedStack(columnCubit: columnCubit, index: index, cards: cards.sublist(1))
             )
           ])
