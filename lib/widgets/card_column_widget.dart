@@ -22,31 +22,8 @@ class ColumnWidget extends StatelessWidget {
               //context.read<ColumnCubit>().onCardDropped(draggedCard);
             },
             builder: (context, candidateData, rejectedData) {
-              var cards = context.read<ColumnCubit>().state.cards;
-              return CardStack(cards: cards);
-              /*return SizedBox(
-                width: 80,
-                height: 250,
-                child: Stack(
-                  children: [
-                    for (var i = 0; i < state.cards.length; i++)
-                      Positioned(
-                        top: i * 18,
-                        left: i * 3,
-                        child: Draggable<PlayingCard>(
-                          data: state.cards[i],
-                          feedback: CardWidget(state.cards[i]),
-                          childWhenDragging: const SizedBox.shrink(),
-                          child: GestureDetector(
-                            onTap: () => context.read<ColumnCubit>().flipCard(i),
-                            child: CardWidget(state.cards[i]),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              );
-              */
+              var column = context.read<ColumnCubit>();
+              return NestedStack(columnCubit: column, index: index, cards: column.state.cards);
             },
           );
         },
@@ -55,32 +32,33 @@ class ColumnWidget extends StatelessWidget {
   }
 }
 
-class CardStack extends StatelessWidget {
+class NestedStack extends StatelessWidget {
+  final ColumnCubit columnCubit;
+  final int index;
   final List<PlayingCard> cards;
-  const CardStack({required this.cards, super.key});
+  const NestedStack({required this.columnCubit, required this.index, required this.cards, super.key});
 
   @override
   Widget build(BuildContext context) {
+    if (cards.isEmpty) return const SizedBox.shrink();
     return SizedBox(
-      width: 80,
-      height: 250,
-      child: Stack(
-        children: [
-          for (var i = 0; i < cards.length; i++)
+      width: 90,
+      height: 430,
+      child: Draggable<PlayingCard>(
+        data: cards[0],
+        feedback: NestedStack(columnCubit: columnCubit, index: index, cards: cards),
+        childWhenDragging: const SizedBox.shrink(),
+        child: GestureDetector(
+          onTap: () => {},//context.read<ColumnCubit>().flipCard(i),
+          child: Stack(children: [
+            CardWidget(cards[0]),
             Positioned(
-              top: i * 18,
-              left: i * 3,
-              child: Draggable<PlayingCard>(
-                data: cards[i],
-                feedback: CardStack(cards: cards.sublist(i)),
-                childWhenDragging: SizedBox.shrink(),
-                child: GestureDetector(
-                  onTap: () => context.read<ColumnCubit>().flipCard(i),
-                  child: CardWidget(cards[i]),
-                ),
-              ),
-            ),
-        ],
+              top: 18,
+              left: 3,
+              child: NestedStack(columnCubit: columnCubit, index: index, cards: cards.sublist(1))
+            )
+          ])
+        ),
       ),
     );
   }
