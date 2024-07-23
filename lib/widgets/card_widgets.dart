@@ -19,10 +19,10 @@ class ColumnWidget extends StatelessWidget {
         builder: (context, state) {
           return DragTarget<CardDragData>(
             onAcceptWithDetails: (details) {
-              context.read<ColumnCubit>().addCards(details.data.cards);
+              context.read<ColumnCubit>().addCards(details.data);
             },
             onWillAcceptWithDetails: (details) {
-              return context.read<ColumnCubit>().willAcceptCards(details.data.cards);
+              return context.read<ColumnCubit>().willAcceptCards(details.data);
             },
             builder: (context, candidateData, rejectedData) {
               var column = context.read<ColumnCubit>();
@@ -62,7 +62,7 @@ class NestedColumnStack extends StatelessWidget {
           Container():
             (cards[0].faceUp) ?
               Draggable<CardDragData>(
-                data: CardDragData(from: index, cards: cards),
+                data: CardDragData.from(cards),
                 feedback: NestedColumnStack(columnCubit: columnCubit, index: index, cards: cards),
                 childWhenDragging: const SizedBox.shrink(),
                 onDragCompleted: () {
@@ -142,7 +142,7 @@ class DeckWidget extends StatelessWidget {
                   widget: (deckCubit.state.active == null)?
                     const SizedBox.shrink() :
                     Draggable<CardDragData>(
-                      data: CardDragData(from: 0, cards: [deckCubit.state.active!]),
+                      data: CardDragData.from([deckCubit.state.active!]),
                       feedback: CardWidget(deckCubit.state.active!),
                       childWhenDragging: const SizedBox.shrink(),
                       child: CardWidget(deckCubit.state.active!),
@@ -166,13 +166,13 @@ class FoundationWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return DragTarget<CardDragData>(
       onAcceptWithDetails: (details) {
-        context.read<FoundationCubit>().addCards(details.data.cards);
+        context.read<FoundationCubit>().addCards(details.data);
       },
       onWillAcceptWithDetails: (details) {
-        return context.read<FoundationCubit>().willAcceptCards(details.data.cards);
+        return context.read<FoundationCubit>().willAcceptCards(details.data);
       },
       builder: (context, candidateData, rejectedData) {
-        return BlocBuilder<FoundationCubit, Map<CardSuit, List<PlayingCard>>>(
+        return BlocBuilder<FoundationCubit, FoundationState>(
           builder: (context, piles){
             return Row(children: [
               for (var suit in CardSuit.values)

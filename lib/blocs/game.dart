@@ -1,6 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/card.dart';
 
+
+typedef CardDragData = List<PlayingCard>;
+
 class ColumnState {
   final List<PlayingCard> cards;
 
@@ -43,7 +46,6 @@ class ColumnCubit extends Cubit<ColumnState> {
     emit(ColumnState(state.cards + cards));
   }
 }
-
 
 class DeckState {
   final PlayingCard? active;
@@ -95,7 +97,9 @@ class DeckCubit extends Cubit<DeckState> {
   }
 }
 
-class FoundationCubit extends Cubit<Map<CardSuit, List<PlayingCard>>> {
+typedef FoundationState = Map<CardSuit, List<PlayingCard>>;
+
+class FoundationCubit extends Cubit<FoundationState> {
   FoundationCubit(super.map);
 
   bool willAcceptCards(List<PlayingCard> cards) {
@@ -110,7 +114,7 @@ class FoundationCubit extends Cubit<Map<CardSuit, List<PlayingCard>>> {
   void addCards(List<PlayingCard> cards) {
     assert(cards.length == 1);
     final card = cards[0].getFaceUp();
-    final piles = Map<CardSuit, List<PlayingCard>>.from(state);
+    final piles = FoundationState.from(state);
     if (!piles.containsKey(card.suit)) {
       piles[card.suit] = [];
     }
@@ -174,10 +178,4 @@ List<List<PlayingCard>> distributeCards(List<PlayingCard> deck, int numberOfColu
     deckindex++;
   }
   return columns;
-}
-
-class CardDragData {
-  final int from;
-  final List<PlayingCard> cards;
-  const CardDragData({required this.from, required this.cards});
 }
