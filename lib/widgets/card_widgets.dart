@@ -39,9 +39,8 @@ class NestedColumnStack extends StatelessWidget {
 
     Widget subStack() => Stack(children: [
       CardWidget(cards[0]),
-      Positioned(
-        top: 18,
-        left: 2,
+      Transform.translate(
+        offset: const Offset(4, 16),
         child: NestedColumnStack(cards: cards.sublist(1))
       )
     ]);

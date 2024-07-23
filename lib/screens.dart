@@ -32,13 +32,14 @@ class GameScreen extends StatelessWidget {
                   ),
                 ),
                 Row(
+                  textDirection: TextDirection.rtl,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    for (var item in gameState.columnCubits.asMap().entries)
+                    for (var column in gameState.columnCubits.reversed)
                       Padding(
                         padding: const EdgeInsets.all(1), // don't need that because the columns are staggered anyway
                         child: BlocProvider.value(
-                          value: item.value,
+                          value: column,
                           child: ColumnWidget()
                         ),
                       )
