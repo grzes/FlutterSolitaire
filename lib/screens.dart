@@ -20,7 +20,11 @@ class GameScreen extends StatelessWidget {
                   width: 7*80,
                   child: Row(
                     children: [
-                      DeckWidget(deckCubit: gameState.deck)
+                      DeckWidget(deckCubit: gameState.deck),
+                      BlocProvider.value(
+                        value: gameState.founds,
+                        child: FoundationWidget(),
+                      ),
                     ],
                   ),
                 ),

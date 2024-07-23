@@ -1,9 +1,11 @@
 import 'dart:math';
+import 'package:blocsolitaire/widgets/card_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/game.dart';
 import '../models/card.dart';
 import 'card_widget.dart';
+import 'card_button.dart';
 
 class ColumnWidget extends StatelessWidget {
   final ColumnCubit columnCubit;
@@ -93,6 +95,7 @@ class WidgetOverCards extends StatelessWidget {
       height: 100,
       child: Stack(
         children: [
+          // Render one card if there's more than one card in the list
           for (int i=0; i<min(1, cards.length); i++)
             CardWidget(cards[cards.length-1], color:Colors.grey),
           (cards.isEmpty) ? widget :
@@ -126,9 +129,9 @@ class DeckWidget extends StatelessWidget {
                   widget: (deckCubit.state.deck.isEmpty) ?
                     GestureDetector(
                       onTap: () { deckCubit.reverse(); },
-                      child: Container(
-                        decoration: BoxDecoration(color: Colors.blue),
-                        child: Icon(Icons.refresh, color: Colors.white,))
+                      child: CardFrame(
+                        child: Icon(Icons.refresh, color: Colors.white,)
+                      )
                     ) :
                     GestureDetector(
                       onTap: () { deckCubit.revealCard(); },
@@ -154,6 +157,36 @@ class DeckWidget extends StatelessWidget {
           );
         }
       ),
+    );
+  }
+}
+
+class FoundationWidget extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<CardDragData>(
+      onAcceptWithDetails: (details) {
+        context.read<FoundationCubit>().addCards(details.data.cards);
+      },
+      onWillAcceptWithDetails: (details) {
+        return context.read<FoundationCubit>().willAcceptCards(details.data.cards);
+      },
+      builder: (context, candidateData, rejectedData) {
+        return BlocBuilder<FoundationCubit, Map<CardSuit, List<PlayingCard>>>(
+          builder: (context, piles){
+            return Row(children: [
+              for (var suit in CardSuit.values)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: piles.containsKey(suit)?
+                    CardWidget(piles[suit]!.last) :
+                    CardSuitFrame(suit: suit),
+                )
+            ]);
+          }
+        );
+      },
     );
   }
 }

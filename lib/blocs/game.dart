@@ -95,14 +95,39 @@ class DeckCubit extends Cubit<DeckState> {
   }
 }
 
+class FoundationCubit extends Cubit<Map<CardSuit, List<PlayingCard>>> {
+  FoundationCubit(super.map);
+
+  bool willAcceptCards(List<PlayingCard> cards) {
+    if (cards.length != 1) return false;
+
+    if (!state.containsKey(cards[0].suit)) {
+      return cards[0].value == CardValue.ace;
+    }
+    return state[cards[0].suit]!.last.value.index + 1 == cards[0].value.index;
+  }
+
+  void addCards(List<PlayingCard> cards) {
+    assert(cards.length == 1);
+    final card = cards[0].getFaceUp();
+    final piles = Map<CardSuit, List<PlayingCard>>.from(state);
+    if (!piles.containsKey(card.suit)) {
+      piles[card.suit] = [];
+    }
+    piles[card.suit]!.add(card);
+    emit(piles);
+  }
+}
+
 class GameState {
   final List<ColumnCubit> columnCubits;
   final DeckCubit deck;
-  GameState(this.columnCubits, this.deck);
+  final FoundationCubit founds;
+  GameState(this.columnCubits, this.deck, this.founds);
 }
 
 class GameCubit extends Cubit<GameState> {
-  GameCubit() : super(GameState([], DeckCubit([]))) {
+  GameCubit() : super(GameState([], DeckCubit([]), FoundationCubit({}))) {
     initializeGame();
   }
 
@@ -119,7 +144,7 @@ class GameCubit extends Cubit<GameState> {
 
 
     // Update the state
-    emit(GameState(columnCubits, DeckCubit(deck.sublist(28,31))));
+    emit(GameState(columnCubits, DeckCubit(deck.sublist(28)), FoundationCubit({})));
   }
 }
 
