@@ -7,39 +7,32 @@ import '../models/card.dart';
 import 'card_widget.dart';
 
 class ColumnWidget extends StatelessWidget {
-  final ColumnCubit columnCubit;
-  final int index;
-  const ColumnWidget({required this.columnCubit, required this.index, super.key});
+  const ColumnWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: columnCubit,
-      child: BlocBuilder<ColumnCubit, ColumnState>(
-        builder: (context, state) {
-          return DragTarget<CardDragData>(
-            onAcceptWithDetails: (details) {
-              context.read<ColumnCubit>().addCards(details.data);
-            },
-            onWillAcceptWithDetails: (details) {
-              return context.read<ColumnCubit>().willAcceptCards(details.data);
-            },
-            builder: (context, candidateData, rejectedData) {
-              var column = context.read<ColumnCubit>();
-              return NestedColumnStack(columnCubit: column, index: index, cards: column.state.cards);
-            },
-          );
-        },
-      ),
+    return DragTarget<CardDragData>(
+      onAcceptWithDetails: (details) {
+        context.read<ColumnCubit>().addCards(details.data);
+      },
+      onWillAcceptWithDetails: (details) {
+        return context.read<ColumnCubit>().willAcceptCards(details.data);
+      },
+      builder: (context, candidateData, rejectedData) {
+        var column = context.read<ColumnCubit>();
+        return BlocBuilder<ColumnCubit, ColumnState>(
+          builder: (context, state) {
+            return NestedColumnStack(cards: column.state.cards);
+          }
+        );
+      },
     );
   }
 }
 
 class NestedColumnStack extends StatelessWidget {
-  final ColumnCubit columnCubit;
-  final int index;
   final List<PlayingCard> cards;
-  const NestedColumnStack({required this.columnCubit, required this.index, required this.cards, super.key});
+  const NestedColumnStack({required this.cards, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +42,7 @@ class NestedColumnStack extends StatelessWidget {
       Positioned(
         top: 18,
         left: 2,
-        child: NestedColumnStack(columnCubit: columnCubit, index: index, cards: cards.sublist(1))
+        child: NestedColumnStack(cards: cards.sublist(1))
       )
     ]);
 
@@ -63,17 +56,17 @@ class NestedColumnStack extends StatelessWidget {
             (cards[0].faceUp) ?
               Draggable<CardDragData>(
                 data: CardDragData.from(cards),
-                feedback: NestedColumnStack(columnCubit: columnCubit, index: index, cards: cards),
+                feedback: NestedColumnStack(cards: cards),
                 childWhenDragging: const SizedBox.shrink(),
                 onDragCompleted: () {
-                  columnCubit.removeCards(cards.length);
+                  context.read<ColumnCubit>().removeCards(cards.length);
                 },
                 child: subStack(),
               ) :
               GestureDetector(
                 onTap: () {
-                  columnCubit.flipTopCard();
-                },//context.read<ColumnCubit>().flipCard(i),
+                  context.read<ColumnCubit>().flipTopCard();
+                },
                 child: subStack(),
               ),
     );
@@ -99,8 +92,8 @@ class WidgetOverCards extends StatelessWidget {
             CardWidget(cards[cards.length-1], color:Colors.grey),
           (cards.isEmpty) ? widget :
           Positioned(
-            top: 6,
-            left: 6,
+            top: 5,
+            left: 5,
             child: widget
           )
       ]),
@@ -109,58 +102,58 @@ class WidgetOverCards extends StatelessWidget {
 }
 
 class DeckWidget extends StatelessWidget {
-  final DeckCubit deckCubit;
-  const DeckWidget({required this.deckCubit, super.key});
+  const DeckWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: deckCubit,
-      child: BlocBuilder<DeckCubit, DeckState>(
-        builder: (context, state) {
-
-          return Padding(
-            padding: const EdgeInsets.only(top: 8, left:0),
-            child: Row(
-              children: [
-                WidgetOverCards(
-                  cards: deckCubit.belowDeck,
-                  widget: (deckCubit.state.deck.isEmpty) ?
-                    GestureDetector(
-                      onTap: () { deckCubit.reverse(); },
-                      child: const CardFrame(
-                        child: Icon(Icons.refresh, color: Colors.white)
-                      )
-                    ) :
-                    GestureDetector(
-                      onTap: () { deckCubit.revealCard(); },
-                      child: (deckCubit.state.deck.isEmpty)? const SizedBox.shrink() : CardWidget(deckCubit.state.deck.last)
-                    ),
-                ),
-                WidgetOverCards(
-                  cards: deckCubit.state.waste,
-                  widget: (deckCubit.state.active == null)?
-                    const SizedBox.shrink() :
-                    Draggable<CardDragData>(
-                      data: CardDragData.from([deckCubit.state.active!]),
-                      feedback: CardWidget(deckCubit.state.active!),
-                      childWhenDragging: const SizedBox.shrink(),
-                      child: CardWidget(deckCubit.state.active!),
-                      onDragCompleted: () {
-                        deckCubit.removeActive();
-                      },
+    return BlocBuilder<DeckCubit, DeckState>(
+      builder: (context, state) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 8, left:0),
+          child: Row(
+            children: [
+              WidgetOverCards(
+                cards: context.read<DeckCubit>().belowDeck,
+                widget: (state.deck.isEmpty) ?
+                  GestureDetector(
+                    onTap: () {
+                      context.read<DeckCubit>().reverse();
+                    },
+                    child: const CardFrame(
+                      child: Icon(Icons.refresh, color: Colors.white)
+                    )
+                  ) :
+                  GestureDetector(
+                    onTap: () {
+                      context.read<DeckCubit>().revealCard();
+                    },
+                    child: (state.deck.isEmpty)? const SizedBox.shrink() : CardWidget(state.deck.last)
                   ),
+              ),
+              WidgetOverCards(
+                cards: state.waste,
+                widget: (state.active == null)?
+                  const SizedBox.shrink() :
+                  Draggable<CardDragData>(
+                    data: CardDragData.from([state.active!]),
+                    feedback: CardWidget(state.active!),
+                    childWhenDragging: const SizedBox.shrink(),
+                    child: CardWidget(state.active!),
+                    onDragCompleted: () {
+                      context.read<DeckCubit>().removeActive();
+                    },
                 ),
+              ),
 
-            ]),
-          );
-        }
-      ),
+          ]),
+        );
+      }
     );
   }
 }
 
 class FoundationWidget extends StatelessWidget {
+  const FoundationWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
