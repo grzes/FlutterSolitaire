@@ -46,22 +46,52 @@ class ColumnCubit extends Cubit<ColumnState> {
 
 
 class DeckState {
+  final PlayingCard? active;
   final List<PlayingCard> deck;
   final List<PlayingCard> waste;
-  DeckState(this.deck, this.waste);
+  DeckState(this.deck, this.waste, this.active);
 }
 
 class DeckCubit extends Cubit<DeckState> {
   DeckCubit(List<PlayingCard> deck)
-      : super(DeckState(deck, List<PlayingCard>.empty()));
+      : super(DeckState(deck, <PlayingCard>[], null));
 
-  void popCard() {
+  List<PlayingCard> get belowDeck {
+    if (state.deck.length > 1) {
+      int l = state.deck.length;
+      return state.deck.sublist(l-1, l);
+    }
+    return <PlayingCard>[];
+  }
+
+  void revealCard() {
     final deck = List<PlayingCard>.from(state.deck);
     final waste = List<PlayingCard>.from(state.waste);
     if (deck.isEmpty) return;
-    var last = deck.removeLast();
-    waste.add(last.getFaceUp());
-    emit(DeckState(deck, waste));
+
+    if (state.active != null) {
+      waste.add(state.active!.getFaceUp());
+    }
+    var active = deck.removeLast().getFaceUp();
+    emit(DeckState(deck, waste, active));
+  }
+
+  void removeActive() {
+    emit(DeckState(state.deck, state.waste, null));
+  }
+
+  void reverse() {
+    final deck = List<PlayingCard>.from(state.deck);
+    final waste = List<PlayingCard>.from(state.waste);
+    assert(deck.isEmpty);
+    // deck.add(state.active?.getFaceDown())
+    if (state.active != null) {
+      deck.add(state.active!.getFaceDown());
+    }
+    for (var card in waste.reversed) {
+      deck.add(card.getFaceDown());
+    }
+    emit(DeckState(deck, [], null));
   }
 }
 

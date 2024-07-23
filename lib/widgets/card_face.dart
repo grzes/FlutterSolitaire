@@ -5,7 +5,8 @@ import 'constants.dart';
 
 class CardFace extends StatelessWidget {
   final PlayingCard card;
-  const CardFace(this.card, {super.key});
+  final Color color;
+  const CardFace(this.card, {super.key, this.color = Colors.white});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,7 @@ class CardFace extends StatelessWidget {
         width: PlayingCardWidth,
         height: PlayingCardHeight,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: color,
           border: Border.all(color: Colors.black),
           borderRadius: BorderRadius.circular(5),
         ),

@@ -83,22 +83,24 @@ class NestedColumnStack extends StatelessWidget {
 class WidgetOverCards extends StatelessWidget {
   final List<PlayingCard> cards;
   final Widget widget;
-  const WidgetOverCards({required this.cards, required this.widget, super.key});
+  final Color color;
+  const WidgetOverCards({required this.cards, required this.widget, this.color = Colors.white, super.key});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 90,
+      width: 80,
       height: 100,
-      child: (cards.isEmpty)?const SizedBox.shrink() : Stack(children: [
-        // 1 card if any
-        for (int i=0; i<min(1, cards.length - 1); i++) CardWidget(cards[i]),
-        (cards.length == 1)? widget :
-        Positioned(
-          top: 6,
-          left: 6,
-          child: widget
-        )
+      child: Stack(
+        children: [
+          for (int i=0; i<min(1, cards.length); i++)
+            CardWidget(cards[cards.length-1], color:Colors.grey),
+          (cards.isEmpty) ? widget :
+          Positioned(
+            top: 6,
+            left: 6,
+            child: widget
+          )
       ]),
     );
   }
@@ -114,23 +116,38 @@ class DeckWidget extends StatelessWidget {
       value: deckCubit,
       child: BlocBuilder<DeckCubit, DeckState>(
         builder: (context, state) {
+
           return Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: 8, left:0),
             child: Row(
               children: [
                 WidgetOverCards(
-                  cards: deckCubit.state.deck,
-                  widget: GestureDetector(
-                    onTap: () { deckCubit.popCard(); },
-                    child: (deckCubit.state.deck.isEmpty)? SizedBox.shrink() : CardWidget(deckCubit.state.deck.last)
-                  )
+                  cards: deckCubit.belowDeck,
+                  widget: (deckCubit.state.deck.isEmpty) ?
+                    GestureDetector(
+                      onTap: () { deckCubit.reverse(); },
+                      child: Container(
+                        decoration: BoxDecoration(color: Colors.blue),
+                        child: Icon(Icons.refresh, color: Colors.white,))
+                    ) :
+                    GestureDetector(
+                      onTap: () { deckCubit.revealCard(); },
+                      child: (deckCubit.state.deck.isEmpty)? SizedBox.shrink() : CardWidget(deckCubit.state.deck.last)
+                    ),
                 ),
                 WidgetOverCards(
                   cards: deckCubit.state.waste,
-                  widget: GestureDetector(
-                    onTap: () { deckCubit.popCard(); },
-                    child: (deckCubit.state.waste.isEmpty)? SizedBox.shrink() : CardWidget(deckCubit.state.waste.last)
-                  )
+                  widget: (deckCubit.state.active == null)?
+                    SizedBox.shrink() :
+                    Draggable<CardDragData>(
+                      data: CardDragData(from: 0, cards: [deckCubit.state.active!]),
+                      feedback: CardWidget(deckCubit.state.active!),
+                      childWhenDragging: const SizedBox.shrink(),
+                      child: CardWidget(deckCubit.state.active!),
+                      onDragCompleted: () {
+                        deckCubit.removeActive();
+                      },
+                  ),
                 ),
 
             ]),
