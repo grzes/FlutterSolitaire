@@ -55,6 +55,14 @@ class DeckCubit extends Cubit<DeckState> {
   DeckCubit(List<PlayingCard> deck)
       : super(DeckState(deck, List<PlayingCard>.empty()));
 
+  void popCard() {
+    final deck = List<PlayingCard>.from(state.deck);
+    final waste = List<PlayingCard>.from(state.waste);
+    if (deck.isEmpty) return;
+    var last = deck.removeLast();
+    waste.add(last.getFaceUp());
+    emit(DeckState(deck, waste));
+  }
 }
 
 class GameState {
@@ -81,7 +89,7 @@ class GameCubit extends Cubit<GameState> {
 
 
     // Update the state
-    emit(GameState(columnCubits, DeckCubit(deck.sublist(28))));
+    emit(GameState(columnCubits, DeckCubit(deck.sublist(28,31))));
   }
 }
 
@@ -101,16 +109,13 @@ List<PlayingCard> createDeck() {
 List<List<PlayingCard>> distributeCards(List<PlayingCard> deck, int numberOfColumns) {
   List<List<PlayingCard>> columns = List.generate(numberOfColumns, (_) => []);
 
-  PlayingCard faceUp(PlayingCard card) => PlayingCard(card.value, card.suit, faceUp: true);
-  PlayingCard faceDown(PlayingCard card) => card;
-
   int deckindex = 0;
   for (int c=0; c<numberOfColumns; c++) {
     for (int down=0; down < c; down++) {
-      columns[c].add(faceDown(deck[deckindex]));
+      columns[c].add(deck[deckindex].getFaceDown());
       deckindex++;
     }
-    columns[c].add(faceUp(deck[deckindex]));
+    columns[c].add(deck[deckindex].getFaceUp());
     deckindex++;
   }
   return columns;

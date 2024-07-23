@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/game.dart';
@@ -53,7 +54,7 @@ class NestedColumnStack extends StatelessWidget {
 
 
     return SizedBox(
-      width: 90,
+      width: 80,
       height: 430,
       child:
         (cards.isEmpty) ?
@@ -74,6 +75,68 @@ class NestedColumnStack extends StatelessWidget {
                 },//context.read<ColumnCubit>().flipCard(i),
                 child: subStack(),
               ),
+    );
+  }
+}
+
+// Draw the second to last card if it exists
+class WidgetOverCards extends StatelessWidget {
+  final List<PlayingCard> cards;
+  final Widget widget;
+  const WidgetOverCards({required this.cards, required this.widget, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 90,
+      height: 100,
+      child: (cards.isEmpty)?const SizedBox.shrink() : Stack(children: [
+        // 1 card if any
+        for (int i=0; i<min(1, cards.length - 1); i++) CardWidget(cards[i]),
+        (cards.length == 1)? widget :
+        Positioned(
+          top: 6,
+          left: 6,
+          child: widget
+        )
+      ]),
+    );
+  }
+}
+
+class DeckWidget extends StatelessWidget {
+  final DeckCubit deckCubit;
+  const DeckWidget({required this.deckCubit, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: deckCubit,
+      child: BlocBuilder<DeckCubit, DeckState>(
+        builder: (context, state) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
+              children: [
+                WidgetOverCards(
+                  cards: deckCubit.state.deck,
+                  widget: GestureDetector(
+                    onTap: () { deckCubit.popCard(); },
+                    child: (deckCubit.state.deck.isEmpty)? SizedBox.shrink() : CardWidget(deckCubit.state.deck.last)
+                  )
+                ),
+                WidgetOverCards(
+                  cards: deckCubit.state.waste,
+                  widget: GestureDetector(
+                    onTap: () { deckCubit.popCard(); },
+                    child: (deckCubit.state.waste.isEmpty)? SizedBox.shrink() : CardWidget(deckCubit.state.waste.last)
+                  )
+                ),
+
+            ]),
+          );
+        }
+      ),
     );
   }
 }

@@ -65,20 +65,6 @@ class PlayingCard {
     }
   }
 
-  /*
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PlayingCard &&
-          runtimeType == other.runtimeType &&
-          suit == other.suit &&
-          value == other.value &&
-          faceUp == other.faceUp;
-
-  @override
-  int get hashCode =>
-      suit.hashCode ^ value.hashCode ^ faceUp.hashCode;
-      */
+  PlayingCard getFaceUp() => (faceUp)? this : PlayingCard(value, suit, faceUp: true);
+  PlayingCard getFaceDown() => (!faceUp)? this : PlayingCard(value, suit, faceUp: false);
 }
-
-// x.index + 1 == y.index to compare values!

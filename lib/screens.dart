@@ -14,14 +14,26 @@ class GameScreen extends StatelessWidget {
         // in the middle of the parent.
         child: BlocBuilder<GameCubit, GameState>(
           builder: (context, gameState) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
+            return Column(
               children: [
-                for (var item in gameState.columnCubits.asMap().entries)
-                  Padding(
-                    padding: const EdgeInsets.all(1), // don't need that because the columns are staggered anyway
-                    child: ColumnWidget(columnCubit: item.value, index: item.key),
-                  )
+                Container(
+                  width: 7*80,
+                  child: Row(
+                    children: [
+                      DeckWidget(deckCubit: gameState.deck)
+                    ],
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var item in gameState.columnCubits.asMap().entries)
+                      Padding(
+                        padding: const EdgeInsets.all(1), // don't need that because the columns are staggered anyway
+                        child: ColumnWidget(columnCubit: item.value, index: item.key),
+                      )
+                  ],
+                ),
               ],
             );
           }
