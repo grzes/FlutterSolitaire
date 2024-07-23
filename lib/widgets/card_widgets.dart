@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/game.dart';
 import '../models/card.dart';
 import 'card_widget.dart';
-import 'card_button.dart';
 
 class ColumnWidget extends StatelessWidget {
   final ColumnCubit columnCubit;
@@ -129,19 +128,19 @@ class DeckWidget extends StatelessWidget {
                   widget: (deckCubit.state.deck.isEmpty) ?
                     GestureDetector(
                       onTap: () { deckCubit.reverse(); },
-                      child: CardFrame(
-                        child: Icon(Icons.refresh, color: Colors.white,)
+                      child: const CardFrame(
+                        child: Icon(Icons.refresh, color: Colors.white)
                       )
                     ) :
                     GestureDetector(
                       onTap: () { deckCubit.revealCard(); },
-                      child: (deckCubit.state.deck.isEmpty)? SizedBox.shrink() : CardWidget(deckCubit.state.deck.last)
+                      child: (deckCubit.state.deck.isEmpty)? const SizedBox.shrink() : CardWidget(deckCubit.state.deck.last)
                     ),
                 ),
                 WidgetOverCards(
                   cards: deckCubit.state.waste,
                   widget: (deckCubit.state.active == null)?
-                    SizedBox.shrink() :
+                    const SizedBox.shrink() :
                     Draggable<CardDragData>(
                       data: CardDragData(from: 0, cards: [deckCubit.state.active!]),
                       feedback: CardWidget(deckCubit.state.active!),
