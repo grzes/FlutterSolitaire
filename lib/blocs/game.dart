@@ -1,55 +1,52 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/card.dart';
 
 
 typedef CardDragData = List<PlayingCard>;
 
-class ColumnState {
-  final List<PlayingCard> cards;
+typedef ColumnState = List<PlayingCard>;
 
-  ColumnState(this.cards);
-}
+typedef FoundationState = Map<CardSuit, List<PlayingCard>>;
+
 
 // Define the Cubit
 class ColumnCubit extends Cubit<ColumnState> {
-  ColumnCubit(List<PlayingCard> initialCards)
-      : super(ColumnState(initialCards));
+  ColumnCubit(super.cards);
 
   void flipCard(int index) {
-    final cards = List<PlayingCard>.from(state.cards);
+    final cards = List<PlayingCard>.from(state);
     final card = cards[index];
     cards[index] = PlayingCard(card.value, card.suit, faceUp: !card.faceUp);
-    emit(ColumnState(cards));
+    emit(ColumnState.from(cards));
   }
 
   bool flipTopCard() {
-    if (state.cards.lastOrNull?.faceUp == false) {
-      flipCard(state.cards.length-1);
+    if (state.lastOrNull?.faceUp == false) {
+      flipCard(state.length-1);
     }
     return allFaceUp;
   }
 
   void removeCards(int num) {
-    emit(ColumnState(state.cards.sublist(0, state.cards.length - num)));
+    emit(ColumnState.from(state.sublist(0, state.length - num)));
   }
 
   bool willAcceptCards(List<PlayingCard> cards) {
-    if (state.cards.isEmpty) {
+    if (state.isEmpty) {
       return cards[0].value == CardValue.king;
     }
-    var last = state.cards.last;
+    var last = state.last;
     var first = cards[0];
     return last.faceUp && last.cardColor != first.cardColor
       && last.value.index == first.value.index + 1;
   }
 
   void addCards(List<PlayingCard> cards) {
-    emit(ColumnState(state.cards + cards));
+    emit(ColumnState.from(state + cards));
   }
 
   bool get allFaceUp {
-    for (var c in state.cards) {
+    for (var c in state) {
       if (!c.faceUp) return false;
     }
     return true;
@@ -110,8 +107,6 @@ class DeckCubit extends Cubit<DeckState> {
     emit(DeckState(deck, [], null));
   }
 }
-
-typedef FoundationState = Map<CardSuit, List<PlayingCard>>;
 
 class FoundationCubit extends Cubit<FoundationState> {
   FoundationCubit(super.map);
@@ -199,10 +194,14 @@ class GameCubit extends Cubit<GameState> {
   }
 
   void solveMove() {
-    for (int c=0; c<7; c++) {
-      if (!state.columnCubits[c].state.cards.isEmpty){
-        state.columnCubits[c].removeCards(1);
-        return;
+    for (var c in state.columnCubits) {
+      if (c.state.isNotEmpty) {
+        var card = c.state.last;
+        if (state.founds.willAcceptCards([card])) {
+          state.founds.addCards([card]);
+          c.removeCards(1);
+          return;
+        }
       }
     }
   }

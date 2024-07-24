@@ -22,7 +22,7 @@ class ColumnWidget extends StatelessWidget {
         var column = context.read<ColumnCubit>();
         return BlocBuilder<ColumnCubit, ColumnState>(
           builder: (context, state) {
-            return NestedColumnStack(cards: column.state.cards);
+            return NestedColumnStack(cards: column.state);
           }
         );
       },
