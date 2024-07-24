@@ -193,22 +193,22 @@ class GameCubit extends Cubit<GameState> {
     emit(GameState(state.columnCubits, state.deck, state.founds, canAutoPlay: true));
   }
 
-  void solveMove() {
+  bool solveMove() {
     for (var c in state.columnCubits) {
       if (c.state.isNotEmpty) {
         var card = c.state.last;
         if (state.founds.willAcceptCards([card])) {
           state.founds.addCards([card]);
           c.removeCards(1);
-          return;
+          return false;
         }
       }
     }
+    return true;
   }
 }
 
 // Helpers:
-
 List<PlayingCard> createDeck() {
   // Create a standard deck of cards
   List<PlayingCard> deck = [];
