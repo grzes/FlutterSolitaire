@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/game.dart';
 import '../models/card.dart';
@@ -89,12 +90,12 @@ class WidgetOverCards extends StatelessWidget {
       child: Stack(
         children: [
           // Render one card if there's more than one card in the list
-          for (int i=0; i<min(1, cards.length); i++)
-            CardWidget(cards[cards.length-1], color:Colors.grey),
+          for (int i=0; i<min(1, cards.length-1); i++)
+            CardWidget(cards[cards.length-2], color:Colors.grey),
           (cards.isEmpty) ? widget :
           Positioned(
-            top: 5,
-            left: 5,
+            top: 6,
+            left: 6,
             child: widget
           )
       ]),
@@ -114,7 +115,7 @@ class DeckWidget extends StatelessWidget {
           child: Row(
             children: [
               WidgetOverCards(
-                cards: context.read<DeckCubit>().belowDeck,
+                cards: state.deck,
                 widget: (state.deck.isEmpty) ?
                   GestureDetector(
                     onTap: () {
@@ -132,7 +133,7 @@ class DeckWidget extends StatelessWidget {
                   ),
               ),
               WidgetOverCards(
-                cards: state.waste,
+                cards: state.waste + [PlayingCard(CardValue.ace, CardSuit.spades)],
                 widget: (state.active == null)?
                   const SizedBox.shrink() :
                   Draggable<CardDragData>(
@@ -141,8 +142,9 @@ class DeckWidget extends StatelessWidget {
                     childWhenDragging: const SizedBox.shrink(),
                     child: CardWidget(state.active!),
                     onDragCompleted: () {
-                      if (context.read<DeckCubit>().removeActive())
+                      if (context.read<DeckCubit>().removeActive()) {
                         context.read<GameCubit>().checkAutoPlay();
+                      }
                     },
                 ),
               ),
@@ -174,7 +176,10 @@ class FoundationWidget extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: piles.containsKey(suit)?
-                    CardWidget(piles[suit]!.last) :
+                    WidgetOverCards(
+                      cards: piles[suit]!,
+                      widget: CardWidget(piles[suit]!.last),
+                    ) :
                     CardSuitFrame(suit: suit),
                 )
             ]);

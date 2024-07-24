@@ -68,14 +68,6 @@ class DeckCubit extends Cubit<DeckState> {
   DeckCubit(List<PlayingCard> deck)
       : super(DeckState(deck, <PlayingCard>[], null));
 
-  List<PlayingCard> get belowDeck {
-    if (state.deck.length > 1) {
-      int l = state.deck.length;
-      return state.deck.sublist(l-1, l);
-    }
-    return <PlayingCard>[];
-  }
-
   void revealCard() {
     final deck = List<PlayingCard>.from(state.deck);
     final waste = List<PlayingCard>.from(state.waste);
