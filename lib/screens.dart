@@ -34,6 +34,7 @@ class GameScreen extends StatelessWidget {
                         value: gameState.deck,
                         child: DeckWidget(),
                       ),
+                      Spacer(),
                       BlocProvider.value(
                         value: gameState.founds,
                         child: FoundationWidget(),
