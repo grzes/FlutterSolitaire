@@ -9,14 +9,29 @@ import 'blocs/game.dart';
 class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    OverlayEntry? overlayEntry;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
-      body: Center(
+      body: Column(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: BlocProvider.value(
-          value: AutoPlayCubit(),
-          child: BlocBuilder<GameCubit, GameState>(
+        children: [
+          BlocBuilder<GameWon, bool>(
+            builder: (context, gameWonState) {
+
+              overlayEntry?.remove();
+              overlayEntry = null;
+
+              if (context.read<GameCubit>().state.founds.gameIsWon) {
+                Future.delayed(Duration(microseconds: 1), () {
+                  overlayEntry = WinScreen();
+                  Overlay.of(context).insert(overlayEntry!);
+                });
+              }
+              return SizedBox.shrink();
+            }
+          ),
+          BlocBuilder<GameCubit, GameState>(
             builder: (context, gameState) {
               return Column(
                 children: [
@@ -65,10 +80,12 @@ class GameScreen extends StatelessWidget {
               );
             }
           ),
-        ),
-      ),
+      ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          overlayEntry?.remove();
+          overlayEntry = null;
+          context.read<GameWon>().setFalse();
           context.read<GameCubit>().initializeGame();
         },
         tooltip: 'Restart',
@@ -76,4 +93,22 @@ class GameScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+OverlayEntry WinScreen() {
+  return OverlayEntry(
+    builder: (context) => Center(
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: EdgeInsets.all(20),
+          color: Colors.black.withOpacity(0.8),
+          child: const Text(
+            'Congratulations!',
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
+      ),
+    ),
+  );
 }

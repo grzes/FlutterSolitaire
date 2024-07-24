@@ -9,6 +9,16 @@ typedef ColumnState = List<PlayingCard>;
 typedef FoundationState = Map<CardSuit, List<PlayingCard>>;
 
 
+class GameWon extends Cubit<bool> {
+  GameWon() : super(false);
+  void setTrue() {
+    emit(true);
+  }
+  void setFalse() {
+    emit(false);
+  }
+}
+
 // Define the Cubit
 class ColumnCubit extends Cubit<ColumnState> {
   ColumnCubit(super.cards);
@@ -121,6 +131,14 @@ class FoundationCubit extends Cubit<FoundationState> {
     }
     piles[card.suit]!.add(card);
     emit(piles);
+  }
+
+  bool get gameIsWon {
+    int kings = 0;
+    for (var p in state.values) {
+      if (p.last.value == CardValue.king) kings++;
+    }
+    return kings == 4;
   }
 }
 

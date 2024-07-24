@@ -171,6 +171,11 @@ class FoundationWidget extends StatelessWidget {
       builder: (context, candidateData, rejectedData) {
         return BlocBuilder<FoundationCubit, FoundationState>(
           builder: (context, piles){
+
+            if (context.read<FoundationCubit>().gameIsWon) {
+              context.read<GameWon>().setTrue();
+            }
+
             return Row(children: [
               for (var suit in CardSuit.values)
                 Padding(
