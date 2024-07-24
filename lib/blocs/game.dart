@@ -72,6 +72,8 @@ class DeckState {
   bool get isEmpty =>
     deck.isEmpty && waste.isEmpty && active == null;
 
+  bool get activeIsNull => active == null;
+
 }
 
 class DeckCubit extends Cubit<DeckState> {
@@ -88,6 +90,12 @@ class DeckCubit extends Cubit<DeckState> {
     }
     var active = deck.removeLast().getFaceUp();
     emit(DeckState(deck, waste, active));
+  }
+
+  bool removeTop() {
+    state.deck.removeLast();
+    emit(DeckState(state.deck, state.waste, null));
+    return state.isEmpty;
   }
 
   bool removeActive() {

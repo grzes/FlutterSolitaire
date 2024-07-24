@@ -110,6 +110,14 @@ class DeckWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<DeckCubit, DeckState>(
       builder: (context, state) {
+
+        final clickableDeck = GestureDetector(
+          onTap: () {
+            context.read<DeckCubit>().revealCard();
+          },
+          child: (state.deck.isEmpty)? const SizedBox.shrink() : CardWidget(state.deck.last)
+        );
+
         return Padding(
           padding: const EdgeInsets.only(top: 8, left:0),
           child: Row(
@@ -125,12 +133,22 @@ class DeckWidget extends StatelessWidget {
                       child: Icon(Icons.refresh, color: Colors.white)
                     )
                   ) :
-                  GestureDetector(
-                    onTap: () {
+                  (state.activeIsNull) ?
+                  Draggable<CardDragData>(
+                    data: [state.deck.last.getFaceUp()],
+                    feedback: CardWidget(state.deck.last.getFaceUp()),
+                    childWhenDragging: const SizedBox.shrink(),
+                    onDragCompleted: () {
+                      if (context.read<DeckCubit>().removeTop()) {
+                        context.read<GameCubit>().checkAutoPlay();
+                      }
+                    },
+                    onDraggableCanceled: (_, __) {
                       context.read<DeckCubit>().revealCard();
                     },
-                    child: (state.deck.isEmpty)? const SizedBox.shrink() : CardWidget(state.deck.last)
-                  ),
+                    child: clickableDeck,
+                  ) :
+                  clickableDeck
               ),
               WidgetOverCards(
                 cards: state.waste + [PlayingCard(CardValue.ace, CardSuit.spades)],
