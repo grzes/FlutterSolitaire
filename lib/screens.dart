@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'widgets/card_widgets.dart';
+import 'widgets/card_button.dart';
 import 'blocs/game.dart';
 
 class GameScreen extends StatelessWidget {
@@ -20,6 +21,15 @@ class GameScreen extends StatelessWidget {
                   width: 7*80,
                   child: Row(
                     children: [
+                      (gameState.canAutoPlay) ?
+                      GestureDetector(
+                        onTap: () {
+                          context.read<GameCubit>().solveMove();
+                        },
+                        child: const CardFrame(
+                          child: Icon(Icons.play_arrow_rounded, color: Colors.white)
+                        )
+                      ) :
                       BlocProvider.value(
                         value: gameState.deck,
                         child: DeckWidget(),

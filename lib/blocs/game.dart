@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/card.dart';
 
@@ -22,10 +23,11 @@ class ColumnCubit extends Cubit<ColumnState> {
     emit(ColumnState(cards));
   }
 
-  void flipTopCard() {
+  bool flipTopCard() {
     if (state.cards.lastOrNull?.faceUp == false) {
       flipCard(state.cards.length-1);
     }
+    return allFaceUp;
   }
 
   void removeCards(int num) {
@@ -45,6 +47,13 @@ class ColumnCubit extends Cubit<ColumnState> {
   void addCards(List<PlayingCard> cards) {
     emit(ColumnState(state.cards + cards));
   }
+
+  bool get allFaceUp {
+    for (var c in state.cards) {
+      if (!c.faceUp) return false;
+    }
+    return true;
+  }
 }
 
 class DeckState {
@@ -52,6 +61,10 @@ class DeckState {
   final List<PlayingCard> deck;
   final List<PlayingCard> waste;
   DeckState(this.deck, this.waste, this.active);
+
+  bool get isEmpty =>
+    deck.isEmpty && waste.isEmpty && active == null;
+
 }
 
 class DeckCubit extends Cubit<DeckState> {
@@ -78,8 +91,9 @@ class DeckCubit extends Cubit<DeckState> {
     emit(DeckState(deck, waste, active));
   }
 
-  void removeActive() {
+  bool removeActive() {
     emit(DeckState(state.deck, state.waste, null));
+    return state.isEmpty;
   }
 
   void reverse() {
@@ -127,7 +141,8 @@ class GameState {
   final List<ColumnCubit> columnCubits;
   final DeckCubit deck;
   final FoundationCubit founds;
-  GameState(this.columnCubits, this.deck, this.founds);
+  final bool canAutoPlay;
+  GameState(this.columnCubits, this.deck, this.founds, {this.canAutoPlay = false});
 }
 
 class GameCubit extends Cubit<GameState> {
@@ -137,6 +152,29 @@ class GameCubit extends Cubit<GameState> {
 
   void initializeGame() {
     // Create and shuffle the deck
+    List<PlayingCard> allcards = [];
+    for (var value in CardValue.values.reversed) {
+      for (var suit in CardSuit.values) {
+        allcards.add(PlayingCard(value, suit));
+      }
+    }
+    List<List<PlayingCard>> columns = List.generate(7, (_) => []);
+
+    final FoundationState piles = FoundationState();
+    List<PlayingCard> remaining = [];
+
+    for (int i=0; i < 12; i++) {
+      for(int s=0; s<4; s++) {
+        int offset = (i%2==0)?2:0;
+        columns[(s + offset) % 4].add(allcards.removeAt(0).getFaceUp());
+      }
+    }
+    var c = columns[0].removeLast();
+    columns[4].add(c.getFaceDown());
+    final columnCubits = columns.map((cards) => ColumnCubit(cards)).toList();
+
+    emit(GameState(columnCubits, DeckCubit(allcards), FoundationCubit({})));
+    /*
     final deck = createDeck();
     deck.shuffle();
 
@@ -149,6 +187,24 @@ class GameCubit extends Cubit<GameState> {
 
     // Update the state
     emit(GameState(columnCubits, DeckCubit(deck.sublist(28)), FoundationCubit({})));
+    */
+  }
+
+  void checkAutoPlay() {
+    if (!state.deck.state.isEmpty) return;
+    for (var c in state.columnCubits) {
+      if (!c.allFaceUp) return;
+    }
+    emit(GameState(state.columnCubits, state.deck, state.founds, canAutoPlay: true));
+  }
+
+  void solveMove() {
+    for (int c=0; c<7; c++) {
+      if (!state.columnCubits[c].state.cards.isEmpty){
+        state.columnCubits[c].removeCards(1);
+        return;
+      }
+    }
   }
 }
 

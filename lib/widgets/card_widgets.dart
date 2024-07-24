@@ -1,9 +1,9 @@
 import 'dart:math';
-import 'package:blocsolitaire/widgets/card_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/game.dart';
 import '../models/card.dart';
+import 'card_button.dart';
 import 'card_widget.dart';
 
 class ColumnWidget extends StatelessWidget {
@@ -64,7 +64,9 @@ class NestedColumnStack extends StatelessWidget {
               ) :
               GestureDetector(
                 onTap: () {
-                  context.read<ColumnCubit>().flipTopCard();
+                  if (context.read<ColumnCubit>().flipTopCard()) {
+                    context.read<GameCubit>().checkAutoPlay();
+                  }
                 },
                 child: subStack(),
               ),
@@ -139,7 +141,8 @@ class DeckWidget extends StatelessWidget {
                     childWhenDragging: const SizedBox.shrink(),
                     child: CardWidget(state.active!),
                     onDragCompleted: () {
-                      context.read<DeckCubit>().removeActive();
+                      if (context.read<DeckCubit>().removeActive())
+                        context.read<GameCubit>().checkAutoPlay();
                     },
                 ),
               ),
