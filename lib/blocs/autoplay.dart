@@ -6,9 +6,9 @@ class AutoPlayCubit extends Cubit<void> {
 
   AutoPlayCubit() : super(null);
 
-  void startAutoPlay(bool Function() shouldStop) {
+  void startAutoPlay(bool Function() shouldStop, {int milliseconds=50}) {
     if (_timer != null) return;
-    _timer = Timer.periodic(Duration(milliseconds: 50), (timer) {
+    _timer = Timer.periodic(Duration(milliseconds: milliseconds), (timer) {
       if (shouldStop()) {
         stopAutoPlay();
       }

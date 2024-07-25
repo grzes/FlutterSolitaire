@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/game.dart';
+import '../blocs/autoplay.dart';
+import '../blocs/cascade.dart';
 import '../models/card.dart';
 import 'card_button.dart';
 import 'card_widget.dart';
@@ -93,9 +95,8 @@ class WidgetOverCards extends StatelessWidget {
           for (int i=0; i<min(1, cards.length-1); i++)
             CardWidget(cards[cards.length-2], color:Colors.grey),
           (cards.isEmpty) ? widget :
-          Positioned(
-            top: 6,
-            left: 6,
+          Transform.translate(
+            offset: const Offset(6, 6),
             child: widget
           )
       ]),
@@ -209,6 +210,39 @@ class FoundationWidget extends StatelessWidget {
           }
         );
       },
+    );
+  }
+}
+
+class CascadeCards extends StatelessWidget {
+  const CascadeCards({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: CascadeCubit(),
+      child: BlocBuilder<GameWon, bool>(
+        builder: (context, gameIsWon) {
+          print("building cascade? ${gameIsWon}");
+          final autoplay = context.read<AutoPlayCubit>();
+          final cascade = context.read<CascadeCubit>();
+          if (gameIsWon) {
+            autoplay.startAutoPlay(() => cascade.add(), milliseconds: 1);
+          } else {
+            autoplay.stopAutoPlay();
+            cascade.reset();
+          }
+          return BlocBuilder<CascadeCubit, List<Widget>>(
+            builder: (context, cards) {
+              print("building stack?");
+              return Stack(children: [
+                Text("${cards.length}"),
+                ...cards
+              ]);
+            }
+          );
+        }
+      )
     );
   }
 }
