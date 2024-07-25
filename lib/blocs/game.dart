@@ -171,23 +171,6 @@ class GameCubit extends Cubit<GameState> {
         allcards.add(PlayingCard(value, suit));
       }
     }
-    List<List<PlayingCard>> columns = List.generate(7, (_) => []);
-
-    final FoundationState piles = FoundationState();
-    List<PlayingCard> remaining = [];
-
-    for (int i=0; i < 12; i++) {
-      for(int s=0; s<4; s++) {
-        int offset = (i%2==0)?2:0;
-        columns[(s + offset) % 4].add(allcards.removeAt(0).getFaceUp());
-      }
-    }
-    var c = columns[0].removeLast();
-    columns[4].add(c.getFaceDown());
-    final columnCubits = columns.map((cards) => ColumnCubit(cards)).toList();
-
-    emit(GameState(columnCubits, DeckCubit(allcards), FoundationCubit({})));
-    /*
     final deck = createDeck();
     deck.shuffle();
 
@@ -197,10 +180,8 @@ class GameCubit extends Cubit<GameState> {
     // Create ColumnCubits for each column
     final columnCubits = columns.map((cards) => ColumnCubit(cards)).toList();
 
-
     // Update the state
     emit(GameState(columnCubits, DeckCubit(deck.sublist(28)), FoundationCubit({})));
-    */
   }
 
   void checkAutoPlay() {
