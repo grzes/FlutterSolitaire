@@ -221,33 +221,57 @@ class CascadeCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: CascadeCubit(PlayingCard(CardValue.ace, CardSuit.spades),
+      value: DeckCascadeCubit(),
         // magic numbers tailored to where the result piles get layed out relative to topCenter
-        x: -4-PlayingCardWidth, y: 14),
       child: BlocBuilder<GameWon, bool>(
         builder: (context, gameIsWon) {
-          final autoplay = context.read<AutoPlayCubit>();
-          final cascade = context.read<CascadeCubit>();
-          final size = MediaQuery.of(context).size;
-          //final RenderBox renderBox = _cardKey.currentContext.findRenderObject();
-          //final position = renderBox.localToGlobal(Offset.zero);
 
+          var cascades = context.read<DeckCascadeCubit>();
+          var autoplay = context.read<AutoPlayCubit>();
+          final size = MediaQuery.of(context).size;
 
           if (gameIsWon) {
-            autoplay.startAutoPlay(() => cascade.add(width:size.width, height:size.height), milliseconds: 1);
+            cascades.addNextCard();
+            autoplay.startAutoPlay(() {
+              if (cascades.state.last.add(width:size.width, height:size.height)) {
+                return cascades.addNextCard();
+              }
+              return false;
+            }, milliseconds: 1);
           } else {
             autoplay.stopAutoPlay();
-            cascade.reset();
+            cascades.reset();
           }
-          return BlocBuilder<CascadeCubit, List<Widget>>(
-            builder: (context, cards) {
+
+          return BlocBuilder<DeckCascadeCubit, List<CascadeCubit>>(
+            builder: (context, cascades) {
               return Stack(children: [
-                ...cards
+                for (var c in cascades)
+                  BlocProvider.value(
+                    value: c,
+                    child: CascadeSingleCard()
+                  )
               ]);
-            }
-          );
+          });
         }
       )
+    );
+  }
+}
+
+
+class CascadeSingleCard extends StatelessWidget {
+  const CascadeSingleCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CascadeCubit, List<Widget>>(
+      builder: (context, cards) {
+        // check if done, call parent cascades cubit to add another?
+        return Stack(children: [
+          ...cards
+        ]);
+      }
     );
   }
 }
