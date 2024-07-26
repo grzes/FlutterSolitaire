@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:blocsolitaire/widgets/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -220,23 +221,27 @@ class CascadeCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: CascadeCubit(),
+      value: CascadeCubit(PlayingCard(CardValue.ace, CardSuit.spades),
+        // magic numbers tailored to where the result piles get layed out relative to topCenter
+        x: -4-PlayingCardWidth, y: 14),
       child: BlocBuilder<GameWon, bool>(
         builder: (context, gameIsWon) {
-          print("building cascade? ${gameIsWon}");
           final autoplay = context.read<AutoPlayCubit>();
           final cascade = context.read<CascadeCubit>();
+          final size = MediaQuery.of(context).size;
+          //final RenderBox renderBox = _cardKey.currentContext.findRenderObject();
+          //final position = renderBox.localToGlobal(Offset.zero);
+
+
           if (gameIsWon) {
-            autoplay.startAutoPlay(() => cascade.add(), milliseconds: 1);
+            autoplay.startAutoPlay(() => cascade.add(width:size.width, height:size.height), milliseconds: 1);
           } else {
             autoplay.stopAutoPlay();
             cascade.reset();
           }
           return BlocBuilder<CascadeCubit, List<Widget>>(
             builder: (context, cards) {
-              print("building stack?");
               return Stack(children: [
-                Text("${cards.length}"),
                 ...cards
               ]);
             }
