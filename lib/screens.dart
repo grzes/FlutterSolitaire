@@ -108,6 +108,7 @@ class GameScreen extends StatelessWidget {
               child: const Icon(Icons.refresh),
             ),
           ),
+          /*
           Positioned(
             bottom: 20,
             right: 120,
@@ -119,6 +120,7 @@ class GameScreen extends StatelessWidget {
               child: const Icon(Icons.sports_score),
             ),
           ),
+          */
         ],
       ),
     );
