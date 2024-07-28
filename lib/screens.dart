@@ -20,12 +20,11 @@ class GameScreen extends StatelessWidget {
               // in the middle of the parent.
               children: [
                 BlocBuilder<GameWon, bool>(
-                  builder: (context, gameWonState) {
-
+                  builder: (context, gameIsWon) {
                     overlayEntry?.remove();
                     overlayEntry = null;
 
-                    if (context.read<GameCubit>().state.founds.gameIsWon) {
+                    if (gameIsWon) {
                       Future.delayed(Duration(microseconds: 1), () {
                         overlayEntry = WinScreen();
                         Overlay.of(context).insert(overlayEntry!);
@@ -47,7 +46,13 @@ class GameScreen extends StatelessWidget {
                                 onTap: () {
                                   final autoplay = context.read<AutoPlayCubit>();
                                   final game = context.read<GameCubit>();
-                                  autoplay.startAutoPlay(() => game.solveMove());
+                                  autoplay.startAutoPlay(() {
+                                    var stop = game.solveMove();
+                                    if (stop) {
+                                      context.read<GameWon>().setTrue();
+                                    }
+                                    return stop;
+                                  });
                                 },
                                 child: const CardFrame(
                                   child: Icon(Icons.play_arrow_rounded, color: Colors.white)

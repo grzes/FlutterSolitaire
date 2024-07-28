@@ -8,25 +8,25 @@ import '../widgets/constants.dart';
 
 
 class DeckCascadeCubit extends Cubit<List<CascadeCubit>> {
-  int suit = 0;
   DeckCascadeCubit() : super([]);
 
 
   bool addNextCard() {
     final stateCopy = List<CascadeCubit>.from(state);
     int drawnCards = stateCopy.length;
+
     if (drawnCards == 52) return true;
 
     int value = (drawnCards / 4).floor();
+    int suit = drawnCards % 4;
 
     var card = PlayingCard(
       CardValue.values[CardValue.values.length - value -1],
       CardSuit.values[suit],
       faceUp: true,
     );
-    double offset = -4 -PlayingCardWidth + suit * 80;
+    double offset = -4 -PlayingCardWidth + suit * (PlayingCardWidth + 39);
     var newCard = CascadeCubit(card, x: offset, y: 14);
-    suit = (suit+1) % 4;
     stateCopy.add(newCard);
     emit(stateCopy);
     return false;
